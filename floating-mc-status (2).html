@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kr6bz SMP</title>
+    <style>
+        /* All previous styles remain exactly the same */
+        :root {
+            --primary: #5865F2;
+            --accent: #7289DA;
+            --success: #43b581;
+            --error: #f04747;
+            --background: #1a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #1a1a1a, #2c2f33, #23272a, #2c2f33);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(44, 47, 51, 0.9);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90%;
+            width: 400px;
+            backdrop-filter: blur(10px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .server-status {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .server-status:hover {
+            transform: scale(1.02);
+        }
+
+        #playerCount {
+            font-size: 1.2em;
+            font-weight: 500;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .ip-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ip-container:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .server-ip {
+            font-family: monospace;
+            font-size: 1.2em;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .copy-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            transform: translateX(150%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kr6bz SMP</h1>
+        <div class="server-status">
+            <div id="playerCount">Loading status...</div>
+        </div>
+        <div class="ip-container">
+            <span class="server-ip">kr6bz.heresjeffy.com</span>
+            <button class="copy-button" onclick="copyIP()">Copy</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">IP copied to clipboard!</div>
+
+    <script>
+        function copyIP() {
+            const ip = 'kr6bz.heresjeffy.com';
+            navigator.clipboard.writeText(ip).then(() => {
+                showToast();
+            }).catch(() => {
+                alert('Server IP: ' + ip);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function updatePlayerCount() {
+            fetch('https://api.mcsrvstat.us/2/kr6bz.heresjeffy.com')
+                .then(response => response.json())
+                .then(data => {
+                    const playerCount = document.getElementById('playerCount');
+                    const status = data.online ? 'var(--success)' : 'var(--error)';
+                    const players = data.players?.online || 0;
+                    
+                    playerCount.innerHTML = `
+                        <span class="status-indicator" style="color: ${status}"></span>
+                        ${players} Players Online
+                    `;
+                })
+                .catch(() => {
+                    const playerCount = document.getElementById('playerCount');
+                    playerCount.innerHTML = `
+                        <span class="status-indicator" style="color: var(--error)"></span>
+                        Unable to fetch status
+                    `;
+                });
+        }
+
+        // Initial update
+        updatePlayerCount();
+
+        // Update every 30 seconds
+        setInterval(updatePlayerCount, 30000);
+    </script>
+</body>
+</html>
