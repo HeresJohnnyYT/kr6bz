@@ -20,7 +20,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
@@ -108,32 +108,20 @@
             color: var(--accent-error);
         }
 
-        .server-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
         }
 
-        .stat-card {
-            background: var(--lunar-gray);
-            padding: 1.5rem;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .status-indicator.online {
+            background-color: var(--accent-success);
+            box-shadow: 0 0 10px var(--accent-success);
         }
 
-        .stat-label {
-            font-size: 0.875rem;
-            color: #888;
-            font-weight: 500;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--lunar-light);
+        .status-indicator.offline {
+            background-color: var(--accent-error);
+            box-shadow: 0 0 10px var(--accent-error);
         }
     </style>
 </head>
@@ -166,25 +154,16 @@
             fetch(API_URL)
                 .then(response => response.json())
                 .then(data => {
-                    const statusBadge = document.getElementById('statusBadge');
-                    if (data.online) {
-                        statusBadge.className = 'status-badge online';
-                        statusBadge.innerHTML = `
-                            <span class="status-indicator online"></span>
-                            Online
-                        `;
-                    } else {
-                        statusBadge.className = 'status-badge offline';
-                        statusBadge.innerHTML = `
-                            <span class="status-indicator offline"></span>
-                            Offline
-                        `;
-                    }
-                })
-                .catch(() => {
-                    const statusBadge = document.getElementById('statusBadge');
-                    statusBadge.className = 'status-badge offline';
+                    const statusBadge = document.getElementById("statusBadge");
+                    statusBadge.className = `status-badge ${data.online ? 'online' : 'offline'}`;
                     statusBadge.innerHTML = `
+                        <span class="status-indicator ${data.online ? 'online' : 'offline'}"></span>
+                        ${data.online ? 'Online' : 'Offline'}
+                    `;
+                })
+                .catch(error => {
+                    document.getElementById("statusBadge").className = "status-badge offline";
+                    document.getElementById("statusBadge").innerHTML = `
                         <span class="status-indicator offline"></span>
                         Offline
                     `;
