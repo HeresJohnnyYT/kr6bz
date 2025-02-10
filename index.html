@@ -3,230 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kr6bz SMP</title>
+    <title>Kr6bz SMP • Server Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* All previous styles remain exactly the same */
         :root {
-            --primary: #5865F2;
-            --accent: #7289DA;
-            --success: #43b581;
-            --error: #f04747;
-            --background: #1a1a1a;
+            --lunar-blue: #2484E4;
+            --lunar-dark: #111111;
+            --lunar-darker: #0A0A0A;
+            --lunar-gray: #1E1E1E;
+            --lunar-light: #f5f5f5;
+            --accent-success: #00ff9d;
+            --accent-error: #ff4646;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+            font-family: 'Inter', sans-serif;
         }
 
         body {
+            background-color: var(--lunar-darker);
+            color: var(--lunar-light);
             min-height: 100vh;
-            background: linear-gradient(-45deg, #1a1a1a, #2c2f33, #23272a, #2c2f33);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        nav {
+            background-color: var(--lunar-dark);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--lunar-light);
+            text-decoration: none;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.5rem;
         }
 
-        .container {
-            background: rgba(44, 47, 51, 0.9);
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 90%;
-            width: 400px;
-            backdrop-filter: blur(10px);
-            animation: float 6s ease-in-out infinite;
+        .logo i {
+            color: var(--lunar-blue);
         }
 
-        h1 {
-            font-size: 2.8em;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
 
-        .server-status {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 16px;
-            margin: 20px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .server-status:hover {
-            transform: scale(1.02);
-        }
-
-        #playerCount {
-            font-size: 1.2em;
-            font-weight: 500;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .ip-container {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 16px;
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .ip-container:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .server-ip {
-            font-family: monospace;
-            font-size: 1.2em;
-            color: var(--accent);
-            letter-spacing: 1px;
-        }
-
-        .copy-button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        .server-card {
+            background: var(--lunar-dark);
             border-radius: 12px;
-            cursor: pointer;
-            font-size: 1em;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .server-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .copy-button:hover {
-            background: var(--accent);
-            transform: translateY(-2px);
+        .status-badge.online {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--accent-success);
         }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px currentColor;
+        .status-badge.offline {
+            background: rgba(255, 70, 70, 0.1);
+            color: var(--accent-error);
         }
 
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            transform: translateX(150%);
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 1000;
+        .server-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--lunar-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #888;
             font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 2.2em;
-            }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--lunar-light);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Kr6bz SMP</h1>
-        <div class="server-status">
-            <div id="playerCount">Loading status...</div>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo">
+                <i class="fas fa-cube"></i>
+                Kr6bz SMP
+            </a>
         </div>
-        <div class="ip-container">
-            <span class="server-ip">kr6bz.heresjeffy.com</span>
-            <button class="copy-button" onclick="copyIP()">Copy</button>
-        </div>
-    </div>
+    </nav>
 
-    <div class="toast" id="toast">IP copied to clipboard!</div>
+    <main>
+        <div class="server-card">
+            <div class="server-header">
+                <h1 class="server-title">Server Status</h1>
+                <div id="statusBadge" class="status-badge">
+                    <span class="status-indicator"></span>
+                    Checking status...
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        function copyIP() {
-            const ip = 'kr6bz.heresjeffy.com';
-            navigator.clipboard.writeText(ip).then(() => {
-                showToast();
-            }).catch(() => {
-                alert('Server IP: ' + ip);
-            });
-        }
+        const API_URL = "https://api.mcsrvstat.us/2/kr6bz.heresjeffy.com";
 
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        function updatePlayerCount() {
-            fetch('https://api.mcsrvstat.us/2/kr6bz.heresjeffy.com')
+        function updateServerStatus() {
+            fetch(API_URL)
                 .then(response => response.json())
                 .then(data => {
-                    const playerCount = document.getElementById('playerCount');
-                    const status = data.online ? 'var(--success)' : 'var(--error)';
-                    const players = data.players?.online || 0;
-                    
-                    playerCount.innerHTML = `
-                        <span class="status-indicator" style="color: ${status}"></span>
-                        ${players} Players Online
-                    `;
+                    const statusBadge = document.getElementById('statusBadge');
+                    if (data.online) {
+                        statusBadge.className = 'status-badge online';
+                        statusBadge.innerHTML = `
+                            <span class="status-indicator online"></span>
+                            Online
+                        `;
+                    } else {
+                        statusBadge.className = 'status-badge offline';
+                        statusBadge.innerHTML = `
+                            <span class="status-indicator offline"></span>
+                            Offline
+                        `;
+                    }
                 })
                 .catch(() => {
-                    const playerCount = document.getElementById('playerCount');
-                    playerCount.innerHTML = `
-                        <span class="status-indicator" style="color: var(--error)"></span>
-                        Unable to fetch status
+                    const statusBadge = document.getElementById('statusBadge');
+                    statusBadge.className = 'status-badge offline';
+                    statusBadge.innerHTML = `
+                        <span class="status-indicator offline"></span>
+                        Offline
                     `;
                 });
         }
 
-        // Initial update
-        updatePlayerCount();
-
-        // Update every 30 seconds
-        setInterval(updatePlayerCount, 30000);
+        updateServerStatus();
+        setInterval(updateServerStatus, 30000);
     </script>
 </body>
 </html>
