@@ -123,6 +123,111 @@
             background-color: var(--accent-error);
             box-shadow: 0 0 10px var(--accent-error);
         }
+
+        .server-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--lunar-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--lunar-light);
+        }
+
+        .server-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .primary-button {
+            background: var(--lunar-blue);
+            color: white;
+            border: none;
+        }
+
+        .primary-button:hover {
+            background: #1d6bc3;
+        }
+
+        .secondary-button {
+            background: var(--lunar-gray);
+            color: var(--lunar-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .secondary-button:hover {
+            background: #2a2a2a;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--lunar-blue);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .server-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .server-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .server-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .action-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -144,33 +249,112 @@
                     Checking status...
                 </div>
             </div>
+
+            <div class="server-stats">
+                <div class="stat-card">
+                    <span class="stat-label">PLAYERS ONLINE</span>
+                    <span class="stat-value" id="playerCount">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">SERVER ADDRESS</span>
+                    <span class="stat-value">kr6bz.heresjeffy.com</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">LAST UPDATED</span>
+                    <span class="stat-value" id="lastUpdated">Just now</span>
+                </div>
+            </div>
+
+            <div class="server-actions">
+                <button class="action-button primary-button" onclick="copyIP()">
+                    <i class="fas fa-copy"></i>
+                    Copy IP Address
+                </button>
+                <button class="action-button secondary-button" onclick="updateServerStatus()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Status
+                </button>
+            </div>
         </div>
     </main>
 
+    <div class="toast" id="toast">IP address copied to clipboard!</div>
+
     <script>
-        const API_URL = "https://api.mcsrvstat.us/2/kr6bz.heresjeffy.com";
+        const SERVER_IP = 'kr6bz.heresjeffy.com';
+        const API_URL = `https://api.mcsrvstat.us/2/${SERVER_IP}`;
+
+        function copyIP() {
+            navigator.clipboard.writeText(SERVER_IP).then(() => {
+                showToast();
+            }).catch(() => {
+                alert('Server IP: ' + SERVER_IP);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateLastUpdated() {
+            const lastUpdated = document.getElementById('lastUpdated');
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            lastUpdated.textContent = `${hours}:${minutes}`;
+        }
 
         function updateServerStatus() {
+            const statusBadge = document.getElementById('statusBadge');
+            const playerCount = document.getElementById('playerCount');
+
+            statusBadge.innerHTML = `
+                <span class="status-indicator"></span>
+                Checking status...
+            `;
+
             fetch(API_URL)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Server status unavailable');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    const statusBadge = document.getElementById("statusBadge");
-                    statusBadge.className = `status-badge ${data.online ? 'online' : 'offline'}`;
+                    const isOnline = data.online === true;
+                    statusBadge.className = `status-badge ${isOnline ? 'online' : 'offline'}`;
                     statusBadge.innerHTML = `
-                        <span class="status-indicator ${data.online ? 'online' : 'offline'}"></span>
-                        ${data.online ? 'Online' : 'Offline'}
+                        <span class="status-indicator ${isOnline ? 'online' : 'offline'}"></span>
+                        ${isOnline ? 'Online' : 'Offline'}
                     `;
+                    
+                    // The mcsrvstat.us API provides player count differently
+                    if (isOnline && data.players) {
+                        playerCount.textContent = `${data.players.online}/${data.players.max}`;
+                    } else {
+                        playerCount.textContent = '-';
+                    }
+                    updateLastUpdated();
                 })
                 .catch(error => {
-                    document.getElementById("statusBadge").className = "status-badge offline";
-                    document.getElementById("statusBadge").innerHTML = `
+                    statusBadge.className = 'status-badge offline';
+                    statusBadge.innerHTML = `
                         <span class="status-indicator offline"></span>
                         Offline
                     `;
+                    playerCount.textContent = '-';
+                    updateLastUpdated();
                 });
         }
 
+        // Initial update
         updateServerStatus();
+
+        // Update every 30 seconds
         setInterval(updateServerStatus, 30000);
     </script>
 </body>
