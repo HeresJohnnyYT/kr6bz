@@ -219,6 +219,19 @@
             transform: translateX(0);
         }
 
+        .player-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .player-head {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
         @media (max-width: 768px) {
             .server-header {
                 flex-direction: column;
@@ -283,38 +296,20 @@
                     Copy IP Address
                 </button>
                 <button class="action-button secondary-button" onclick="updateServerStatus()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh Status
+                    <i class="fas fa-sync"></i>
+                    Refresh
                 </button>
             </div>
-        </div>
-        <div id="playerNames" class="server-card" style="display: none;">
-            <h2>Online Players</h2>
-            <ul id="playersList"></ul>
+
+            <div id="playerNames" style="display: none;">
+                <h3>Players Online:</h3>
+                <ul id="playersList"></ul>
+            </div>
         </div>
     </main>
 
-    <div class="toast" id="toast">IP address copied to clipboard!</div>
-
     <script>
-        const SERVER_IP = 'kr6bz.heresjeffy.com';
-        const API_URL = `https://api.mcsrvstat.us/2/${SERVER_IP}`;
-
-        function copyIP() {
-            navigator.clipboard.writeText(SERVER_IP).then(() => {
-                showToast();
-            }).catch(() => {
-                alert('Server IP: ' + SERVER_IP);
-            });
-        }
-
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+        const API_URL = "https://api.mcsrvstat.us/2/kr6bz.heresjeffy.com";
 
         function updateLastUpdated() {
             const lastUpdated = document.getElementById('lastUpdated');
@@ -341,7 +336,12 @@
                         playersList.innerHTML = '';
                         data.players.list.forEach(player => {
                             const listItem = document.createElement('li');
-                            listItem.textContent = player;
+                            const playerImage = document.createElement('img');
+                            playerImage.src = `https://minotar.net/helm/${player}/32.png`; // Minecraft head image URL
+                            playerImage.classList.add('player-head');
+                            listItem.classList.add('player-item');
+                            listItem.appendChild(playerImage);
+                            listItem.appendChild(document.createTextNode(player));
                             playersList.appendChild(listItem);
                         });
                         playerNamesContainer.style.display = 'block';
@@ -358,6 +358,17 @@
                 .catch(() => {
                     alert('Error fetching server status.');
                 });
+        }
+
+        function copyIP() {
+            navigator.clipboard.writeText("kr6bz.heresjeffy.com");
+            const toast = document.createElement('div');
+            toast.classList.add('toast', 'show');
+            toast.textContent = "IP Address copied to clipboard!";
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         window.onload = updateServerStatus;
