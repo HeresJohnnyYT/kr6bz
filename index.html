@@ -14,13 +14,14 @@
             --lunar-light: #f5f5f5;
             --accent-success: #00ff9d;
             --accent-error: #ff4646;
+            --shadow-light: rgba(255, 255, 255, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         body {
@@ -30,12 +31,13 @@
             display: flex;
             flex-direction: column;
             line-height: 1.6;
+            font-size: 16px;
         }
 
         nav {
             background-color: var(--lunar-dark);
             padding: 1rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--shadow-light);
         }
 
         .nav-content {
@@ -47,7 +49,7 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--lunar-light);
             text-decoration: none;
@@ -73,7 +75,8 @@
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--shadow-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .server-header {
@@ -84,33 +87,35 @@
         }
 
         .server-title {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 700;
+            color: var(--lunar-light);
         }
 
         .status-badge {
             padding: 0.5rem 1rem;
             border-radius: 50px;
-            font-size: 0.875rem;
+            font-size: 1rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.2s ease;
         }
 
         .status-badge.online {
-            background: rgba(0, 255, 157, 0.1);
+            background: rgba(0, 255, 157, 0.2);
             color: var(--accent-success);
         }
 
         .status-badge.offline {
-            background: rgba(255, 70, 70, 0.1);
+            background: rgba(255, 70, 70, 0.2);
             color: var(--accent-error);
         }
 
         .status-indicator {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
 
@@ -138,16 +143,21 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
         .stat-label {
-            font-size: 0.875rem;
+            font-size: 1rem;
             color: #888;
             font-weight: 500;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--lunar-light);
         }
@@ -177,6 +187,7 @@
 
         .primary-button:hover {
             background: #1d6bc3;
+            transform: scale(1.05);
         }
 
         .secondary-button {
@@ -187,6 +198,7 @@
 
         .secondary-button:hover {
             background: #2a2a2a;
+            transform: scale(1.05);
         }
 
         .toast {
@@ -308,54 +320,34 @@
             lastUpdated.textContent = `${hours}:${minutes}`;
         }
 
-        function updateServerStatus() {
-            const statusBadge = document.getElementById('statusBadge');
-            const playerCount = document.getElementById('playerCount');
+        async function updateServerStatus() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
 
-            statusBadge.innerHTML = `
-                <span class="status-indicator"></span>
-                Checking status...
-            `;
+                const statusBadge = document.getElementById('statusBadge');
+                const playerCount = document.getElementById('playerCount');
+                const statusIndicator = document.querySelector('.status-indicator');
 
-            fetch(API_URL)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Server status unavailable');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const isOnline = data.online === true;
-                    statusBadge.className = `status-badge ${isOnline ? 'online' : 'offline'}`;
-                    statusBadge.innerHTML = `
-                        <span class="status-indicator ${isOnline ? 'online' : 'offline'}"></span>
-                        ${isOnline ? 'Online' : 'Offline'}
-                    `;
-                    
-                    // The mcsrvstat.us API provides player count differently
-                    if (isOnline && data.players) {
-                        playerCount.textContent = `${data.players.online}/${data.players.max}`;
-                    } else {
-                        playerCount.textContent = '-';
-                    }
-                    updateLastUpdated();
-                })
-                .catch(error => {
-                    statusBadge.className = 'status-badge offline';
-                    statusBadge.innerHTML = `
-                        <span class="status-indicator offline"></span>
-                        Offline
-                    `;
-                    playerCount.textContent = '-';
-                    updateLastUpdated();
-                });
+                if (data.online) {
+                    statusBadge.classList.remove('offline');
+                    statusBadge.classList.add('online');
+                    statusBadge.innerHTML = `<span class="status-indicator online"></span> ONLINE`;
+                    playerCount.textContent = data.players.online;
+                } else {
+                    statusBadge.classList.remove('online');
+                    statusBadge.classList.add('offline');
+                    statusBadge.innerHTML = `<span class="status-indicator offline"></span> OFFLINE`;
+                    playerCount.textContent = '0';
+                }
+                updateLastUpdated();
+            } catch (err) {
+                console.error('Error fetching server status:', err);
+            }
         }
 
-        // Initial update
         updateServerStatus();
-
-        // Update every 30 seconds
-        setInterval(updateServerStatus, 30000);
+        setInterval(updateServerStatus, 30000);  // Refresh status every 30 seconds
     </script>
 </body>
 </html>
