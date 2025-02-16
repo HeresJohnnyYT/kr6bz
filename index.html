@@ -201,20 +201,6 @@
             transform: scale(1.05);
         }
 
-        .player-list {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--lunar-gray);
-            list-style: none;
-            padding-left: 0;
-            font-size: 1rem;
-        }
-
-        .player-list li {
-            color: var(--lunar-light);
-            padding: 0.5rem 0;
-        }
-
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -301,10 +287,10 @@
                     Refresh Status
                 </button>
             </div>
-
-            <div class="player-list" id="playerList">
-                <!-- Player names will be dynamically inserted here -->
-            </div>
+        </div>
+        <div id="playerNames" class="server-card" style="display: none;">
+            <h2>Online Players</h2>
+            <ul id="playersList"></ul>
         </div>
     </main>
 
@@ -332,46 +318,46 @@
 
         function updateLastUpdated() {
             const lastUpdated = document.getElementById('lastUpdated');
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            lastUpdated.textContent = `${hours}:${minutes}`;
+            lastUpdated.innerText = new Date().toLocaleTimeString();
         }
 
-        async function updateServerStatus() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
+        function updateServerStatus() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const statusBadge = document.getElementById('statusBadge');
+                    const playerCount = document.getElementById('playerCount');
+                    const playerNamesContainer = document.getElementById('playerNames');
+                    const playersList = document.getElementById('playersList');
 
-                const statusBadge = document.getElementById('statusBadge');
-                const playerCount = document.getElementById('playerCount');
-                const playerList = document.getElementById('playerList');
+                    updateLastUpdated();
 
-                if (data.online) {
-                    statusBadge.classList.remove('offline');
-                    statusBadge.classList.add('online');
-                    statusBadge.innerHTML = `<span class="status-indicator online"></span>Online`;
-                    playerCount.textContent = `${data.players.online}`;
+                    if (data.online) {
+                        statusBadge.classList.remove('offline');
+                        statusBadge.classList.add('online');
+                        statusBadge.innerHTML = `<span class="status-indicator online"></span>Online`;
 
-                    // Display the player names
-                    playerList.innerHTML = '';
-                    data.players.list.forEach(player => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = player;
-                        playerList.appendChild(listItem);
-                    });
-                } else {
-                    statusBadge.classList.remove('online');
-                    statusBadge.classList.add('offline');
-                    statusBadge.innerHTML = `<span class="status-indicator offline"></span>Offline`;
-                    playerCount.textContent = `-`;
-                    playerList.innerHTML = '';
-                }
+                        playerCount.innerText = data.players.online;
+                        playersList.innerHTML = '';
+                        data.players.list.forEach(player => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = player;
+                            playersList.appendChild(listItem);
+                        });
+                        playerNamesContainer.style.display = 'block';
+                    } else {
+                        statusBadge.classList.remove('online');
+                        statusBadge.classList.add('offline');
+                        statusBadge.innerHTML = `<span class="status-indicator offline"></span>Offline`;
 
-                updateLastUpdated();
-            } catch (error) {
-                alert('Failed to fetch server status!');
-            }
+                        playerCount.innerText = '0';
+                        playersList.innerHTML = '';
+                        playerNamesContainer.style.display = 'none';
+                    }
+                })
+                .catch(() => {
+                    alert('Error fetching server status.');
+                });
         }
 
         window.onload = updateServerStatus;
