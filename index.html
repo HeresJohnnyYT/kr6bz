@@ -3,94 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Status</title>
+    <title>Kr6bz SMP • Server Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+        :root {
+            --lunar-blue: #2484E4;
+            --lunar-dark: #111111;
+            --lunar-darker: #0A0A0A;
+            --lunar-light: #f5f5f5;
+            --accent-success: #00ff9d;
+            --accent-error: #ff4646;
+            --shadow-light: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
         }
-        header {
-            background-color: #242833;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 24px;
+
+        body {
+            background-color: var(--lunar-darker);
+            color: var(--lunar-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 16px;
         }
-        .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+        nav {
+            background-color: var(--lunar-dark);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--shadow-light);
         }
-        .status {
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--lunar-light);
+            text-decoration: none;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
         }
-        .status-circle {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            margin-right: 10px;
+
+        .logo i {
+            color: var(--lunar-blue);
         }
-        .status.online {
-            background-color: #4CAF50;
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
-        .status.offline {
-            background-color: #f44336;
+
+        .server-card {
+            background: var(--lunar-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--shadow-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-        .player-list {
+
+        .server-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        .player-card {
-            background-color: #e0e0e0;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 120px;
-            text-align: center;
+
+        .server-title {
+            font-size: 2rem;
+            font-weight: 700;
         }
-        .player-card img {
-            width: 50px;
-            height: 50px;
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .status-badge.online {
+            background: rgba(0, 255, 157, 0.2);
+            color: var(--accent-success);
+        }
+
+        .status-badge.offline {
+            background: rgba(255, 70, 70, 0.2);
+            color: var(--accent-error);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
-        .player-card p {
-            margin-top: 10px;
-            font-size: 14px;
+
+        .status-indicator.online {
+            background-color: var(--accent-success);
+            box-shadow: 0 0 10px var(--accent-success);
+        }
+
+        .status-indicator.offline {
+            background-color: var(--accent-error);
+            box-shadow: 0 0 10px var(--accent-error);
+        }
+
+        .server-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--lunar-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .server-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .primary-button {
+            background: var(--lunar-blue);
+            color: white;
+            border: none;
+        }
+
+        .primary-button:hover {
+            background: #1d6bc3;
+            transform: scale(1.05);
+        }
+
+        .secondary-button {
+            background: var(--lunar-light);
+            color: var(--lunar-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .secondary-button:hover {
+            background: #2a2a2a;
+            transform: scale(1.05);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--lunar-blue);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .server-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .server-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .server-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .action-button {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-
-<header>
-    Server Status
-</header>
-
-<div class="container">
-    <div class="status">
-        <div class="status-circle online"></div>
-        <p>Server is Online</p>
-    </div>
-
-    <div class="player-list">
-        <div class="player-card">
-            <img src="player1-head.png" alt="Player 1">
-            <p>Player 1</p>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo">
+                <i class="fas fa-cube"></i> Kr6bz SMP
+            </a>
         </div>
-        <div class="player-card">
-            <img src="player2-head.png" alt="Player 2">
-            <p>Player 2</p>
-        </div>
-        <!-- Add more players as needed -->
-    </div>
-</div>
+    </nav>
 
+    <main>
+        <div class="server-card">
+            <div class="server-header">
+                <h1 class="server-title">Server Status</h1>
+                <div id="statusBadge" class="status-badge">
+                    <span class="status-indicator"></span> Checking status...
+                </div>
+            </div>
+
+            <div class="server-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Players Online</span>
+                    <span class="stat-value" id="playerCount">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Server Address</span>
+                    <span class="stat-value">kr6bz.heresjeffy.com</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value" id="lastUpdated">Just now</span>
+                </div>
+            </div>
+
+            <div class="server-actions">
+                <button class="action-button primary-button" onclick="copyIP()">
+                    <i class="fas fa-copy"></i> Copy IP Address
+                </button>
+                <button class="action-button secondary-button" onclick="updateServerStatus()">
+                    <i class="fas fa-sync-alt"></i> Refresh Status
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">IP address copied to clipboard!</div>
+
+    <script>
+        const SERVER_IP = 'kr6bz.heresjeffy.com';
+        const API_URL = `https://api.mcsrvstat.us/2/${SERVER_IP}`;
+
+        function copyIP() {
+            navigator.clipboard.writeText(SERVER_IP).then(() => {
+                showToast();
+            }).catch(() => {
+                alert('Server IP: ' + SERVER_IP);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateLastUpdated() {
+            const lastUpdated = document.getElementById('lastUpdated');
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            lastUpdated.textContent = `${hours}:${minutes}`;
+        }
+
+        function fetchServerStatus() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.online) {
+                        document.getElementById('statusBadge').classList.add('online');
+                        document.getElementById('statusBadge').classList.remove('offline');
+                        document.getElementById('statusBadge').innerHTML = `<span class="status-indicator online"></span> Online`;
+                        document.getElementById('playerCount').textContent = `${data.players.online} / ${data.players.max}`;
+                    } else {
+                        document.getElementById('statusBadge').classList.add('offline');
+                        document.getElementById('statusBadge').classList.remove('online');
+                        document.getElementById('statusBadge').innerHTML = `<span class="status-indicator offline"></span> Offline`;
+                        document.getElementById('playerCount').textContent = 'Offline';
+                    }
+                    updateLastUpdated();
+                })
+                .catch(() => {
+                    document.getElementById('statusBadge').classList.add('offline');
+                    document.getElementById('statusBadge').classList.remove('online');
+                    document.getElementById('statusBadge').innerHTML = `<span class="status-indicator offline"></span> Error fetching status`;
+                });
+        }
+
+        function updateServerStatus() {
+            fetchServerStatus();
+        }
+
+        // Initial call to fetch server status
+        fetchServerStatus();
+    </script>
 </body>
 </html>
