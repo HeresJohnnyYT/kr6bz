@@ -10,7 +10,6 @@
             --lunar-blue: #2484E4;
             --lunar-dark: #111111;
             --lunar-darker: #0A0A0A;
-            --lunar-light: #f5f5f5;
             --accent-success: #00ff9d;
             --accent-error: #ff4646;
             --shadow-light: rgba(255, 255, 255, 0.1);
@@ -25,7 +24,7 @@
 
         body {
             background-color: var(--lunar-darker);
-            color: var(--lunar-light);
+            color: #ddd;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -49,10 +48,8 @@
         .logo {
             font-size: 1.75rem;
             font-weight: 700;
-            color: var(--lunar-light);
+            color: #fff;
             text-decoration: none;
-            display: flex;
-            align-items: center;
         }
 
         .logo i {
@@ -132,13 +129,12 @@
         }
 
         .stat-card {
-            background: var(--lunar-light);
+            background: var(--lunar-dark);
             padding: 1.5rem;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            transition: transform 0.3s ease;
         }
 
         .stat-card:hover {
@@ -154,6 +150,21 @@
         .stat-value {
             font-size: 1.75rem;
             font-weight: 700;
+        }
+
+        .player-heads {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .player-head {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-size: cover;
+            border: 2px solid var(--lunar-blue);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
         }
 
         .server-actions {
@@ -185,8 +196,8 @@
         }
 
         .secondary-button {
-            background: var(--lunar-light);
-            color: var(--lunar-dark);
+            background: var(--lunar-dark);
+            color: var(--lunar-light);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -269,6 +280,8 @@
                 </div>
             </div>
 
+            <div class="player-heads" id="playerHeads"></div>
+
             <div class="server-actions">
                 <button class="action-button primary-button" onclick="copyIP()">
                     <i class="fas fa-copy"></i> Copy IP Address
@@ -289,8 +302,6 @@
         function copyIP() {
             navigator.clipboard.writeText(SERVER_IP).then(() => {
                 showToast();
-            }).catch(() => {
-                alert('Server IP: ' + SERVER_IP);
             });
         }
 
@@ -304,9 +315,9 @@
 
         function updateLastUpdated() {
             const lastUpdated = document.getElementById('lastUpdated');
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const date = new Date();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
             lastUpdated.textContent = `${hours}:${minutes}`;
         }
 
@@ -319,11 +330,13 @@
                         document.getElementById('statusBadge').classList.remove('offline');
                         document.getElementById('statusBadge').innerHTML = `<span class="status-indicator online"></span> Online`;
                         document.getElementById('playerCount').textContent = `${data.players.online} / ${data.players.max}`;
+                        displayPlayerHeads(data.players.list);
                     } else {
                         document.getElementById('statusBadge').classList.add('offline');
                         document.getElementById('statusBadge').classList.remove('online');
                         document.getElementById('statusBadge').innerHTML = `<span class="status-indicator offline"></span> Offline`;
                         document.getElementById('playerCount').textContent = 'Offline';
+                        document.getElementById('playerHeads').innerHTML = '';
                     }
                     updateLastUpdated();
                 })
@@ -332,6 +345,17 @@
                     document.getElementById('statusBadge').classList.remove('online');
                     document.getElementById('statusBadge').innerHTML = `<span class="status-indicator offline"></span> Error fetching status`;
                 });
+        }
+
+        function displayPlayerHeads(players) {
+            const playerHeadsContainer = document.getElementById('playerHeads');
+            playerHeadsContainer.innerHTML = '';
+            players.forEach(player => {
+                const head = document.createElement('div');
+                head.classList.add('player-head');
+                head.style.backgroundImage = `url(https://minotar.net/armor/body/${player}/100.png)`;
+                playerHeadsContainer.appendChild(head);
+            });
         }
 
         function updateServerStatus() {
